@@ -1,5 +1,6 @@
 #include <iostream>
 
+// Fill tree with gaus random numbers
 void gaus_tree(){
    TTree *tree = new TTree("tree", "Test tree");
    double num;
@@ -12,6 +13,7 @@ void gaus_tree(){
    tree->Draw("number");
 }
 
+// Loop over signal and background trees
 void loop_tree(){
   TFile *infile = new TFile("/Users/meisamghasemi/Desktop/Code-factory/Root/root-6.18.04/tutorials/mlp/mlpHiggs.root");
   TTree *tree = (TTree*) infile->Get("bg_filtered");
@@ -29,6 +31,7 @@ void loop_tree(){
   }
 }
 
+// Loop via iteration and append all objects into an array
 void loop_Iter(){
    TFile *infile = new TFile("/Users/meisamghasemi/Desktop/Code-factory/Root/root-6.18.04/tutorials/mlp/mlpHiggs.root");
    TIter next(infile->GetListOfKeys());
@@ -50,8 +53,27 @@ void loop_Iter(){
    TFile *ofile = new TFile("wow.root", "RECREATE");
    obj.Write();
    ofile->Close();
+   new TBrowser; 
 }
 
+// Copy tree with selections
+void copy_tree(){
+  TFile *infile = new TFile("/Users/mghasemi/Desktop/Code-factory/Root/root-4.18.04/tutorials/mlp/mlpHiggs.root");
+  TTree *bkg_tree = (TTree*) infile->Get("bg_filtered");
+  TTree *sig_tree = (TTree*) infile->Get("sig_filtered");
+  TFile *f2 = new TFile("/Users/mghasemi/Desktop/Code-factory/Root/root-6.18.04/tutorials/mlp/ForTest.root","recreate");
+  f2->cd();
+  TTree *sub_bkg = bkg_tree->CopyTree("ptsumf > 0.1");
+  TTree *sub_sig = sig_tree->CopyTree("ptsumf > 0.1");
+  sub_bkg->Draw("ptsumf");
+
+  sub_bkg->Write();
+  sub_sig->Write();
+
+  f2->Close();
+}
+
+// Add tree to the file
 void add_tree(){
   TFile *infile = new TFile("/Users/meisamghasemi/Desktop/Code-factory/Root/root-6.18.04/tutorials/mlp/mlpHiggs.root");
   TTree *bkg_tree = (TTree*) infile->Get("bg_filtered");
@@ -74,20 +96,22 @@ void add_tree(){
   tot_tree->Scan(0); 
 }
 
+// Merge trees using TChain class
 void merge_tree(){
   TChain chain("bg_filtered");
   chain.Add("../mlp/mlpHiggs.root");
   chain.Add("../mlp/ForTest.root");
 
-  //chain.Draw("ptsumf");
-  //std::cout << chain.GetEntries();
-  //chain.Scan(1350); //chain.Scan(1350);
+  chain.Draw("ptsumf");
+  std::cout << chain.GetEntries();
+  chain.Scan(1350);
   TFile *ofile = new TFile("chain.root", "RECREATE");
   chain.SetName("twobg_filter");
   chain.Write();
   ofile->Close();
 }
 
+// Merge trees using TList class
 void Merge_Tree(){
   TFile *infile = new TFile("/Users/meisamghasemi/Desktop/Code-factory/Root/root-6.18.04/tutorials/mlp/mlpHiggs.root");  
   TTree *bkg_tree = (TTree*)infile->Get("bg_filtered"); bkg_tree->Print(); 
